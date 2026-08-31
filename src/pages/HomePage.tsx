@@ -1,13 +1,14 @@
 import { useState } from "react";
-import type { Player } from "../types";
+import { useNavigate } from "react-router-dom";
+import { createGame } from "../api";
+import { saveRole } from "../roleStorage";
 import { MAX_PLAYERS, MIN_PLAYERS, totalRoundsFor } from "../wizardRules";
 
-interface Props {
-  onStart: (players: Player[]) => void;
-}
-
-export function Setup({ onStart }: Props) {
+export default function HomePage() {
+  const navigate = useNavigate();
   const [names, setNames] = useState<string[]>(["", "", ""]);
+  const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const canAdd = names.length < MAX_PLAYERS;
   const canRemove = names.length > MIN_PLAYERS;
@@ -26,22 +27,27 @@ export function Setup({ onStart }: Props) {
     if (canRemove) setNames((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function handleStart() {
-    if (!canStart) return;
-    const players: Player[] = names.map((name, i) => ({
-      id: `${Date.now()}-${i}`,
-      name: name.trim(),
-    }));
-    onStart(players);
+  async function handleCreate() {
+    if (!canStart || creating) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const { shareCode, adminSecret } = await createGame(names.map((n) => n.trim()));
+      saveRole(shareCode, { kind: "admin", adminSecret });
+      navigate(`/g/${shareCode}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Spiel konnte nicht erstellt werden.");
+      setCreating(false);
+    }
   }
 
   return (
     <div className="card setup">
       <h1>🧙 Wizard Punktezähler</h1>
       <p className="subtitle">
-        Spieler eintragen und loslegen. Mit {names.length} Spieler
-        {names.length === 1 ? "" : "n"} werden{" "}
-        <strong>{totalRoundsFor(names.length)}</strong> Runden gespielt.
+        Spieler eintragen und ein neues Spiel erstellen. Mit {names.length} Spieler
+        {names.length === 1 ? "" : "n"} werden <strong>{totalRoundsFor(names.length)}</strong> Runden
+        gespielt. Danach bekommst du einen Link zum Teilen.
       </p>
 
       <div className="player-list">
@@ -55,7 +61,7 @@ export function Setup({ onStart }: Props) {
               maxLength={20}
               onChange={(e) => updateName(i, e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && canStart) handleStart();
+                if (e.key === "Enter" && canStart) handleCreate();
               }}
             />
             {canRemove && (
@@ -76,8 +82,10 @@ export function Setup({ onStart }: Props) {
         + Spieler hinzufügen
       </button>
 
-      <button type="button" className="primary" onClick={handleStart} disabled={!canStart}>
-        Spiel starten
+      {error && <p className="warning">{error}</p>}
+
+      <button type="button" className="primary" onClick={handleCreate} disabled={!canStart || creating}>
+        {creating ? "Erstelle Spiel…" : "Spiel erstellen"}
       </button>
     </div>
   );

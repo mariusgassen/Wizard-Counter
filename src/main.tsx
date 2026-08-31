@@ -1,10 +1,19 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
-import App from "./App";
+import HomePage from "./pages/HomePage";
+import GamePage from "./pages/GamePage";
+
+const router = createBrowserRouter([
+  { path: "/", element: <HomePage /> },
+  { path: "/g/:shareCode", element: <GamePage /> },
+]);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <div className="app">
+      <RouterProvider router={router} />
+    </div>
   </StrictMode>,
 );
