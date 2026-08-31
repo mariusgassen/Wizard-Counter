@@ -1,5 +1,5 @@
 services:
-  app:
+  wizard-app:
     build: .
     restart: unless-stopped
     environment:
