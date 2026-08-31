@@ -1,12 +1,18 @@
 import type { GameState, Role } from "./types";
 
 export class ApiError extends Error {}
+export class NetworkError extends Error {}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(path, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...options.headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      ...options,
+      headers: { "Content-Type": "application/json", ...options.headers },
+    });
+  } catch {
+    throw new NetworkError("Keine Verbindung zum Server.");
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new ApiError(body.error ?? `Fehler ${res.status}`);

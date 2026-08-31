@@ -5,6 +5,7 @@ import * as store from "./store.js";
 import * as game from "./game.js";
 import { HttpError } from "./game.js";
 import { subscribe, unsubscribe, broadcast } from "./events.js";
+import { buildManifest } from "./manifest.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.join(__dirname, "..", "dist");
@@ -46,6 +47,18 @@ const asyncRoute = (fn) => (req, res, next) => {
     next(err);
   }
 };
+
+app.get("/api/health", (req, res) => {
+  if (store.isHealthy()) {
+    res.json({ status: "ok" });
+  } else {
+    res.status(503).json({ status: "error" });
+  }
+});
+
+app.get("/manifest/:code.webmanifest", (req, res) => {
+  res.type("application/manifest+json").json(buildManifest(`/g/${req.params.code}`));
+});
 
 app.post(
   "/api/games",
