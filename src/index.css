@@ -1,0 +1,267 @@
+:root {
+  color-scheme: dark;
+  --bg: #17111f;
+  --card-bg: #241b3a;
+  --card-bg-2: #2d2249;
+  --accent: #7c5cff;
+  --accent-2: #ffd166;
+  --text: #f1eefc;
+  --text-dim: #b8aed6;
+  --pos: #6fe3a1;
+  --neg: #ff6f6f;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #2a2049 0%, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  margin: 0.25rem 0 1rem;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.player-number {
+  width: 1.5rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+input[type="text"],
+select {
+  background: var(--card-bg-2);
+  border: 1px solid #4a3d70;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.6rem 0.7rem;
+  font-size: 1rem;
+  width: 100%;
+}
+
+select {
+  width: auto;
+  min-width: 3.5rem;
+}
+
+button {
+  font-size: 1rem;
+  border-radius: 10px;
+  border: none;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary {
+  background: var(--accent);
+  color: white;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid #4a3d70;
+  width: 100%;
+}
+
+.secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.danger {
+  background: var(--neg);
+  color: #2a0e0e;
+}
+
+.link {
+  background: none;
+  color: var(--text-dim);
+  text-decoration: underline;
+  padding: 0.4rem;
+}
+
+.icon-button {
+  background: transparent;
+  color: var(--text-dim);
+  padding: 0.4rem 0.6rem;
+}
+
+.round-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.badge {
+  background: var(--accent);
+  color: white;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.entry-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.entry-table th {
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 500;
+  padding-bottom: 0.4rem;
+}
+
+.entry-table td {
+  padding: 0.35rem 0.25rem;
+}
+
+.player-name {
+  font-weight: 600;
+}
+
+.warning {
+  color: var(--accent-2);
+  font-size: 0.9rem;
+}
+
+.standings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.standings li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--card-bg-2);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+}
+
+.standings li.leader {
+  background: linear-gradient(90deg, #4a3d70, var(--card-bg-2));
+  border: 1px solid var(--accent-2);
+}
+
+.standings .rank {
+  color: var(--text-dim);
+  width: 1.5rem;
+}
+
+.standings .name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.standings .score {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.history-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid #392c5c;
+}
+
+.history-table td.pos {
+  color: var(--pos);
+}
+
+.history-table td.neg {
+  color: var(--neg);
+}
+
+.reset-area {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.game-over h1 {
+  text-align: center;
+}
+
+.game-over .winner {
+  text-align: center;
+  color: var(--accent-2);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
