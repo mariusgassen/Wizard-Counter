@@ -9,6 +9,7 @@ import { ClaimPanel } from "../components/ClaimPanel";
 import { RoundEntry } from "../components/RoundEntry";
 import { Scoreboard } from "../components/Scoreboard";
 import { GameOver } from "../components/GameOver";
+import { setManifestHref } from "../manifestLink";
 
 export default function GamePage() {
   const { shareCode = "" } = useParams();
@@ -17,6 +18,10 @@ export default function GamePage() {
   const { game, error } = useGameEvents(shareCode);
 
   const [role, setRole] = useState<Role>(() => loadRole(shareCode) ?? { kind: "spectator" });
+
+  useEffect(() => {
+    setManifestHref(`/manifest/${shareCode}.webmanifest`);
+  }, [shareCode]);
 
   useEffect(() => {
     const adminSecret = searchParams.get("admin");

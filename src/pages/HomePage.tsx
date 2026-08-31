@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createGame } from "../api";
 import { saveRole } from "../roleStorage";
+import { resetManifestHref } from "../manifestLink";
 import { MAX_PLAYERS, MIN_PLAYERS, totalRoundsFor } from "../wizardRules";
 
 export default function HomePage() {
@@ -9,6 +10,10 @@ export default function HomePage() {
   const [names, setNames] = useState<string[]>(["", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    resetManifestHref();
+  }, []);
 
   const canAdd = names.length < MAX_PLAYERS;
   const canRemove = names.length > MIN_PLAYERS;

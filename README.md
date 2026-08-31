@@ -26,6 +26,22 @@ Der Admin-Link ist der geheime "Vollzugriff"-Schlüssel (Spieler verwalten,
 Runden freigeben) und sollte nicht öffentlich geteilt werden — der normale
 Spiel-Link reicht für alle Mitspieler.
 
+## Installierbar (PWA)
+
+Die App lässt sich auf dem Smartphone installieren ("Zum Startbildschirm
+hinzufügen" / "App installieren") und läuft dann im Vollbild ohne
+Browser-UI. Öffnet man dabei gerade ein laufendes Spiel, zeigt der
+Browser einen Installations-Link, der genau zu diesem Spiel zurückführt
+(eigenes Manifest pro Share-Code unter `/manifest/:code.webmanifest`) —
+von der Startseite aus installiert landet man dagegen wieder bei "neues
+Spiel erstellen". Ein kleiner Service Worker (`public/sw.js`) sorgt
+zusätzlich dafür, dass bei fehlender Verbindung eine freundliche
+Offline-Seite statt eines Browser-Fehlers erscheint. Da die App für jede
+Aktion eine Serververbindung braucht (Live-Sync über SSE), gibt es
+bewusst keine echte Offline-Funktionalität — API-Aufrufe und der SSE-Strom
+werden vom Service Worker nicht zwischengespeichert, damit nie veraltete
+Spielstände angezeigt werden.
+
 ## Architektur
 
 - **Frontend:** React + Vite + TypeScript (`src/`), Routing mit
