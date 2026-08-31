@@ -59,6 +59,11 @@ export function RoundEntry({ shareCode, role, game }: Props) {
   const missing = order.filter((p) => valueOf(p.id, activeField) === undefined);
   const submittedCount = order.length - missing.length;
 
+  const phase =
+    game.phase === "bidding"
+      ? { key: "bidding", icon: "📣", label: "Ansage", verb: "angesagt" }
+      : { key: "tricks", icon: "✅", label: "Stiche", verb: "eingetragen" };
+
   const isAdmin = role.kind === "admin";
   const myTurn =
     role.kind === "player" &&
@@ -81,15 +86,24 @@ export function RoundEntry({ shareCode, role, game }: Props) {
           {cards} Karte{cards === 1 ? "" : "n"}
         </span>
       </div>
-      <p className="subtitle">
-        Geber: {dealer.name} · Phase: {game.phase === "bidding" ? "Ansagen" : "Stiche"} ·{" "}
-        {submittedCount}/{order.length} abgegeben
-      </p>
+      <div className="phase-indicator">
+        <span className={`phase-pill phase-${phase.key}`}>
+          {phase.icon} {phase.label}
+        </span>
+        <span className="subtitle phase-indicator-text">
+          Geber: {dealer.name} · {submittedCount}/{order.length} {phase.verb}
+        </span>
+      </div>
 
       {myTurn && (
-        <div className="turn-card">
+        <div className={`turn-card phase-${phase.key}`}>
+          <p className="turn-card-eyebrow">
+            {phase.icon} {phase.label}
+          </p>
           <p className="turn-card-question">
-            {game.phase === "bidding" ? "Wie viele Stiche sagst du an?" : "Wie viele Stiche hast du gemacht?"}
+            {game.phase === "bidding"
+              ? "Wie viele Stiche sagst du an, bevor die Runde gespielt wird?"
+              : "Wie viele Stiche hast du in dieser Runde tatsächlich gemacht?"}
           </p>
           <div className="stepper">
             {Array.from({ length: myMax + 1 }, (_, n) => (
@@ -111,8 +125,8 @@ export function RoundEntry({ shareCode, role, game }: Props) {
         <thead>
           <tr>
             <th>Spieler</th>
-            <th>Ansage</th>
-            <th>Stiche</th>
+            <th className={game.phase === "bidding" ? "col-active" : undefined}>Ansage</th>
+            <th className={game.phase === "tricks" ? "col-active" : undefined}>Stiche</th>
           </tr>
         </thead>
         <tbody>
@@ -152,7 +166,7 @@ export function RoundEntry({ shareCode, role, game }: Props) {
 
       {missing.length > 0 && (
         <p className="subtitle waiting-note">
-          Warten auf {game.phase === "bidding" ? "Ansage" : "Stiche"} von: {missing.map((p) => p.name).join(", ")}
+          Warten auf {phase.label} von: {missing.map((p) => p.name).join(", ")}
         </p>
       )}
 
