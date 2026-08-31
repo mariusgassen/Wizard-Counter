@@ -127,6 +127,18 @@ app.delete(
 );
 
 app.post(
+  "/api/games/:code/players/reorder",
+  asyncRoute((req, res) => {
+    const { code } = req.params;
+    requireAdmin(req, code);
+    const state = loadGameOr404(code);
+    game.reorderPlayers(state, req.body?.playerIds);
+    persistAndBroadcast(code, state);
+    res.json(game.toPublicState(state));
+  }),
+);
+
+app.post(
   "/api/games/:code/players/:playerId/reset",
   asyncRoute((req, res) => {
     const { code, playerId } = req.params;

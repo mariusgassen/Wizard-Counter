@@ -52,6 +52,14 @@ export function removePlayer(shareCode: string, role: Role, playerId: string) {
   });
 }
 
+export function reorderPlayers(shareCode: string, role: Role, playerIds: string[]) {
+  return request<GameState>(`/api/games/${shareCode}/players/reorder`, {
+    method: "POST",
+    headers: roleHeaders(role),
+    body: JSON.stringify({ playerIds }),
+  });
+}
+
 export function resetPlayerClaim(shareCode: string, role: Role, playerId: string) {
   return request<GameState>(`/api/games/${shareCode}/players/${playerId}/reset`, {
     method: "POST",

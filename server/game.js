@@ -46,6 +46,21 @@ export function removePlayer(state, playerId) {
   return state;
 }
 
+export function reorderPlayers(state, playerIds) {
+  if (state.status !== "setup") {
+    throw new HttpError(400, "Die Sitzordnung kann nur vor Spielstart geändert werden.");
+  }
+  if (!Array.isArray(playerIds) || playerIds.length !== state.players.length) {
+    throw new HttpError(400, "Ungültige Spielerreihenfolge.");
+  }
+  const byId = new Map(state.players.map((p) => [p.id, p]));
+  if (new Set(playerIds).size !== playerIds.length || playerIds.some((id) => !byId.has(id))) {
+    throw new HttpError(400, "Ungültige Spielerreihenfolge.");
+  }
+  state.players = playerIds.map((id) => byId.get(id));
+  return state;
+}
+
 export function claimPlayer(state, playerId) {
   const player = state.players.find((p) => p.id === playerId);
   if (!player) throw new HttpError(404, "Spieler nicht gefunden.");
