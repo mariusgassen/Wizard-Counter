@@ -164,6 +164,15 @@ export function advancePhase(state) {
   throw new HttpError(400, "Keine offene Phase zum Fortschreiten.");
 }
 
+export function cancelGame(state) {
+  if (state.status === "finished" || state.status === "cancelled") {
+    throw new HttpError(400, "Spiel kann nicht mehr abgebrochen werden.");
+  }
+  state.status = "cancelled";
+  state.phase = null;
+  return state;
+}
+
 export function toPublicState(state) {
   return {
     status: state.status,

@@ -12,7 +12,7 @@ export interface RoundEntry {
 /** One finalized round: entries keyed by player id. */
 export type RoundResult = Record<string, { bid: number; tricks: number }>;
 
-export type GameStatus = "setup" | "playing" | "finished";
+export type GameStatus = "setup" | "playing" | "finished" | "cancelled";
 export type Phase = "bidding" | "tricks" | null;
 
 export interface GameState {

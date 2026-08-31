@@ -80,6 +80,13 @@ export function advancePhase(shareCode: string, role: Role) {
   });
 }
 
+export function cancelGame(shareCode: string, role: Role) {
+  return request<GameState>(`/api/games/${shareCode}/cancel`, {
+    method: "POST",
+    headers: roleHeaders(role),
+  });
+}
+
 export function setEntry(
   shareCode: string,
   role: Role,

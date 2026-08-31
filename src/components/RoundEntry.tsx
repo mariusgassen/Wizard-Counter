@@ -55,12 +55,21 @@ export function RoundEntry({ shareCode, role, game }: Props) {
     }
   }
 
-  const missing = order.filter((p) => {
-    const field = game.phase === "bidding" ? "bid" : "tricks";
-    return valueOf(p.id, field) === undefined;
-  });
+  const activeField: "bid" | "tricks" = game.phase === "bidding" ? "bid" : "tricks";
+  const missing = order.filter((p) => valueOf(p.id, activeField) === undefined);
+  const submittedCount = order.length - missing.length;
 
   const isAdmin = role.kind === "admin";
+  const myTurn =
+    role.kind === "player" &&
+    game.players.some((p) => p.id === role.playerId) &&
+    valueOf(role.playerId, activeField) === undefined;
+  const myMax = cards;
+
+  async function submitMine(value: number) {
+    if (role.kind !== "player") return;
+    await handleChange(role.playerId, activeField, String(value));
+  }
 
   return (
     <div className="card round-entry">
@@ -73,8 +82,30 @@ export function RoundEntry({ shareCode, role, game }: Props) {
         </span>
       </div>
       <p className="subtitle">
-        Geber: {dealer.name} · Phase: {game.phase === "bidding" ? "Ansagen" : "Stiche"}
+        Geber: {dealer.name} · Phase: {game.phase === "bidding" ? "Ansagen" : "Stiche"} ·{" "}
+        {submittedCount}/{order.length} abgegeben
       </p>
+
+      {myTurn && (
+        <div className="turn-card">
+          <p className="turn-card-question">
+            {game.phase === "bidding" ? "Wie viele Stiche sagst du an?" : "Wie viele Stiche hast du gemacht?"}
+          </p>
+          <div className="stepper">
+            {Array.from({ length: myMax + 1 }, (_, n) => (
+              <button
+                key={n}
+                type="button"
+                className="stepper-option"
+                disabled={busy}
+                onClick={() => submitMine(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <table className="entry-table">
         <thead>

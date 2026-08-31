@@ -173,6 +173,18 @@ app.post(
   }),
 );
 
+app.post(
+  "/api/games/:code/cancel",
+  asyncRoute((req, res) => {
+    const { code } = req.params;
+    requireAdmin(req, code);
+    const state = loadGameOr404(code);
+    game.cancelGame(state);
+    persistAndBroadcast(code, state);
+    res.json(game.toPublicState(state));
+  }),
+);
+
 app.put(
   "/api/games/:code/entry",
   asyncRoute((req, res) => {

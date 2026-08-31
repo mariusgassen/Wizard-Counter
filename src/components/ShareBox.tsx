@@ -37,12 +37,12 @@ export function ShareBox({ shareCode, role }: Props) {
   const shareLink = `${origin}/g/${shareCode}`;
 
   return (
-    <div className="card share-box">
-      <h2>Einladen</h2>
+    <div className="share-box">
       <p className="subtitle">
-        Diesen Link an alle Mitspieler schicken. Jeder kann sich dort als einer der angelegten Spieler
-        eintragen und seine eigenen Ansagen &amp; Stiche live eingeben.
+        Spiel-Code an die Mitspieler durchsagen oder den Link schicken. Jeder kann sich damit als einer
+        der angelegten Spieler eintragen und seine eigenen Ansagen &amp; Stiche live eingeben.
       </p>
+      <CopyRow label="Spiel-Code" value={shareCode} />
       <CopyRow label="Spiel-Link" value={shareLink} />
       {role.kind === "admin" && (
         <>
