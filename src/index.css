@@ -295,6 +295,11 @@ button {
   margin-bottom: 1rem;
 }
 
+.share-button {
+  width: 100%;
+  margin-bottom: 0.6rem;
+}
+
 .copy-row {
   display: flex;
   align-items: center;
@@ -467,13 +472,16 @@ button {
   padding: 1rem;
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
   z-index: 100;
+  overscroll-behavior: contain;
 }
 
 .dialog-box {
   width: 100%;
   max-width: 480px;
   max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .dialog-actions {

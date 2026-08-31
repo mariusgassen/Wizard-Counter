@@ -5,6 +5,7 @@ import { cancelGame } from "../api";
 import { clearRole } from "../roleStorage";
 import { ShareBox } from "./ShareBox";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 interface Props {
   shareCode: string;
@@ -24,6 +25,8 @@ export function AppMenu({ shareCode, role, game }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const gameIsActive = ACTIVE_STATUSES.has(game.status);
+
+  useBodyScrollLock(open);
 
   function handleNewGameClick() {
     if (gameIsActive) {

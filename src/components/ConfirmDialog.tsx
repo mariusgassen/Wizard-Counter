@@ -1,3 +1,5 @@
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+
 interface Props {
   title: string;
   message: string;
@@ -19,6 +21,8 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: Props) {
+  useBodyScrollLock(true);
+
   return (
     <div className="dialog-overlay" onClick={onCancel}>
       <div
