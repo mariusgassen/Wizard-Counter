@@ -18,9 +18,12 @@ export function RoundEntry({ shareCode, role, game }: Props) {
   const dealer = game.players[dealerIndex(game.currentRoundIndex, game.players.length)];
 
   function canEdit(playerId: string, field: "bid" | "tricks") {
+    // Each field only exists during its own phase – the bid before the round is
+    // played, the tricks after – so it's locked outside that phase for everyone,
+    // admin included, once it has been decided.
+    if (field !== activeField) return false;
     if (role.kind === "admin") return true;
-    if (role.kind !== "player" || role.playerId !== playerId) return false;
-    return (field === "bid" && game.phase === "bidding") || (field === "tricks" && game.phase === "tricks");
+    return role.kind === "player" && role.playerId === playerId;
   }
 
   function valueOf(playerId: string, field: "bid" | "tricks") {
@@ -55,12 +58,26 @@ export function RoundEntry({ shareCode, role, game }: Props) {
     }
   }
 
-  const missing = order.filter((p) => {
-    const field = game.phase === "bidding" ? "bid" : "tricks";
-    return valueOf(p.id, field) === undefined;
-  });
+  const activeField: "bid" | "tricks" = game.phase === "bidding" ? "bid" : "tricks";
+  const missing = order.filter((p) => valueOf(p.id, activeField) === undefined);
+  const submittedCount = order.length - missing.length;
+
+  const phase =
+    game.phase === "bidding"
+      ? { key: "bidding", icon: "📣", label: "Ansage", verb: "angesagt" }
+      : { key: "tricks", icon: "✅", label: "Stiche", verb: "eingetragen" };
 
   const isAdmin = role.kind === "admin";
+  const myTurn =
+    role.kind === "player" &&
+    game.players.some((p) => p.id === role.playerId) &&
+    valueOf(role.playerId, activeField) === undefined;
+  const myMax = cards;
+
+  async function submitMine(value: number) {
+    if (role.kind !== "player") return;
+    await handleChange(role.playerId, activeField, String(value));
+  }
 
   return (
     <div className="card round-entry">
@@ -72,16 +89,47 @@ export function RoundEntry({ shareCode, role, game }: Props) {
           {cards} Karte{cards === 1 ? "" : "n"}
         </span>
       </div>
-      <p className="subtitle">
-        Geber: {dealer.name} · Phase: {game.phase === "bidding" ? "Ansagen" : "Stiche"}
-      </p>
+      <div className="phase-indicator">
+        <span className={`phase-pill phase-${phase.key}`}>
+          {phase.icon} {phase.label}
+        </span>
+        <span className="subtitle phase-indicator-text">
+          Geber: {dealer.name} · {submittedCount}/{order.length} {phase.verb}
+        </span>
+      </div>
+
+      {myTurn && (
+        <div className={`turn-card phase-${phase.key}`}>
+          <p className="turn-card-eyebrow">
+            {phase.icon} {phase.label}
+          </p>
+          <p className="turn-card-question">
+            {game.phase === "bidding"
+              ? "Wie viele Stiche sagst du an, bevor die Runde gespielt wird?"
+              : "Wie viele Stiche hast du in dieser Runde tatsächlich gemacht?"}
+          </p>
+          <div className="stepper">
+            {Array.from({ length: myMax + 1 }, (_, n) => (
+              <button
+                key={n}
+                type="button"
+                className="stepper-option"
+                disabled={busy}
+                onClick={() => submitMine(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <table className="entry-table">
         <thead>
           <tr>
             <th>Spieler</th>
-            <th>Ansage</th>
-            <th>Stiche</th>
+            <th className={game.phase === "bidding" ? "col-active" : undefined}>Ansage</th>
+            <th className={game.phase === "tricks" ? "col-active" : undefined}>Stiche</th>
           </tr>
         </thead>
         <tbody>
@@ -108,8 +156,21 @@ export function RoundEntry({ shareCode, role, game }: Props) {
                           </option>
                         ))}
                       </select>
+                    ) : value !== undefined ? (
+                      <span className="entry-value">{value}</span>
+                    ) : field !== activeField ? (
+                      <span
+                        className="entry-value entry-locked"
+                        title={
+                          field === "tricks"
+                            ? "Erst nach der Ansagephase möglich"
+                            : "Ansagephase ist bereits abgeschlossen"
+                        }
+                      >
+                        🔒
+                      </span>
                     ) : (
-                      <span className="entry-value">{value ?? "…"}</span>
+                      <span className="entry-value">…</span>
                     )}
                   </td>
                 );
@@ -121,14 +182,19 @@ export function RoundEntry({ shareCode, role, game }: Props) {
 
       {missing.length > 0 && (
         <p className="subtitle waiting-note">
-          Warten auf {game.phase === "bidding" ? "Ansage" : "Stiche"} von: {missing.map((p) => p.name).join(", ")}
+          Warten auf {phase.label} von: {missing.map((p) => p.name).join(", ")}
         </p>
       )}
 
       {error && <p className="warning">{error}</p>}
 
       {isAdmin && (
-        <button type="button" className="primary" onClick={handleAdvance} disabled={busy}>
+        <button
+          type="button"
+          className="primary"
+          onClick={handleAdvance}
+          disabled={busy || (game.phase === "bidding" && missing.length > 0)}
+        >
           {game.phase === "bidding" ? "Stiche öffnen" : "Runde abschließen"}
         </button>
       )}

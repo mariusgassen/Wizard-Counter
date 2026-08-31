@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useGameEvents } from "../hooks/useGameEvents";
 import { loadRole, saveRole } from "../roleStorage";
 import type { Role } from "../types";
-import { ShareBox } from "../components/ShareBox";
+import { AppMenu } from "../components/AppMenu";
 import { PlayerManager } from "../components/PlayerManager";
 import { ClaimPanel } from "../components/ClaimPanel";
 import { RoundEntry } from "../components/RoundEntry";
@@ -63,13 +63,28 @@ export default function GamePage() {
     );
   }
 
+  if (game.status === "cancelled") {
+    return (
+      <>
+        <AppMenu shareCode={shareCode} role={role} game={game} />
+        <div className="card">
+          <h1>Spiel abgebrochen</h1>
+          <p className="subtitle">Dieses Spiel wurde vom Admin beendet.</p>
+          <button type="button" className="primary" onClick={() => navigate("/")}>
+            Neues Spiel erstellen
+          </button>
+        </div>
+      </>
+    );
+  }
+
   const myPlayerId = role.kind === "player" ? role.playerId : null;
   const iAmClaimed = myPlayerId !== null && game.players.some((p) => p.id === myPlayerId);
   const showClaimPanel = game.status !== "finished" && role.kind !== "admin" && !iAmClaimed;
 
   return (
     <>
-      <ShareBox shareCode={shareCode} role={role} />
+      <AppMenu shareCode={shareCode} role={role} game={game} />
 
       {game.status === "setup" && role.kind === "admin" && (
         <PlayerManager shareCode={shareCode} role={role} players={game.players} />

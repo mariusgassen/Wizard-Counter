@@ -46,6 +46,21 @@ export function removePlayer(state, playerId) {
   return state;
 }
 
+export function reorderPlayers(state, playerIds) {
+  if (state.status !== "setup") {
+    throw new HttpError(400, "Die Sitzordnung kann nur vor Spielstart geändert werden.");
+  }
+  if (!Array.isArray(playerIds) || playerIds.length !== state.players.length) {
+    throw new HttpError(400, "Ungültige Spielerreihenfolge.");
+  }
+  const byId = new Map(state.players.map((p) => [p.id, p]));
+  if (new Set(playerIds).size !== playerIds.length || playerIds.some((id) => !byId.has(id))) {
+    throw new HttpError(400, "Ungültige Spielerreihenfolge.");
+  }
+  state.players = playerIds.map((id) => byId.get(id));
+  return state;
+}
+
 export function claimPlayer(state, playerId) {
   const player = state.players.find((p) => p.id === playerId);
   if (!player) throw new HttpError(404, "Spieler nicht gefunden.");
@@ -97,6 +112,13 @@ export function setEntry(state, { playerId, field, value, roundIndex, isAdmin })
     if (field !== expectedField) {
       throw new HttpError(403, "Dieses Feld ist gerade nicht freigegeben.");
     }
+  } else if (targetRoundIndex === state.currentRoundIndex) {
+    if (field === "tricks" && state.phase !== "tricks") {
+      throw new HttpError(400, "Die Stiche können erst eingetragen werden, wenn die Ansagephase abgeschlossen ist.");
+    }
+    if (field === "bid" && state.phase !== "bidding") {
+      throw new HttpError(400, "Die Ansage ist bereits abgeschlossen und kann nicht mehr geändert werden.");
+    }
   }
 
   if (targetRoundIndex < 0 || targetRoundIndex > state.currentRoundIndex) {
@@ -126,6 +148,13 @@ export function advancePhase(state) {
   if (state.status !== "playing") throw new HttpError(400, "Das Spiel läuft aktuell nicht.");
 
   if (state.phase === "bidding") {
+    const missing = state.players.filter((p) => state.currentEntries[p.id]?.bid === undefined);
+    if (missing.length > 0) {
+      throw new HttpError(
+        400,
+        `${missing.map((p) => p.name).join(", ")} ${missing.length === 1 ? "hat" : "haben"} noch keine Ansage gemacht.`,
+      );
+    }
     state.phase = "tricks";
     return state;
   }
@@ -162,6 +191,15 @@ export function advancePhase(state) {
   }
 
   throw new HttpError(400, "Keine offene Phase zum Fortschreiten.");
+}
+
+export function cancelGame(state) {
+  if (state.status === "finished" || state.status === "cancelled") {
+    throw new HttpError(400, "Spiel kann nicht mehr abgebrochen werden.");
+  }
+  state.status = "cancelled";
+  state.phase = null;
+  return state;
 }
 
 export function toPublicState(state) {
