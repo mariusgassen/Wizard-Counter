@@ -469,8 +469,8 @@ button {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 1rem;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   z-index: 100;
   overscroll-behavior: contain;
 }
@@ -478,8 +478,8 @@ button {
 .dialog-box {
   width: 100%;
   max-width: 480px;
-  max-height: calc(100vh - 2rem);
-  max-height: calc(100dvh - 2rem);
+  max-height: calc(100vh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
+  max-height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
   overflow-y: auto;
   overscroll-behavior: contain;
 }
