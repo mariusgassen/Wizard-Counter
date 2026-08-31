@@ -112,6 +112,8 @@ export function setEntry(state, { playerId, field, value, roundIndex, isAdmin })
     if (field !== expectedField) {
       throw new HttpError(403, "Dieses Feld ist gerade nicht freigegeben.");
     }
+  } else if (targetRoundIndex === state.currentRoundIndex && field === "tricks" && state.phase !== "tricks") {
+    throw new HttpError(400, "Die Stiche können erst eingetragen werden, wenn die Ansagephase abgeschlossen ist.");
   }
 
   if (targetRoundIndex < 0 || targetRoundIndex > state.currentRoundIndex) {

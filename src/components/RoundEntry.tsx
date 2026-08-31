@@ -18,6 +18,9 @@ export function RoundEntry({ shareCode, role, game }: Props) {
   const dealer = game.players[dealerIndex(game.currentRoundIndex, game.players.length)];
 
   function canEdit(playerId: string, field: "bid" | "tricks") {
+    // Tricks can't be known before the round is actually played, so this column
+    // stays locked for everyone – including the admin – until the tricks phase.
+    if (field === "tricks" && game.phase !== "tricks") return false;
     if (role.kind === "admin") return true;
     if (role.kind !== "player" || role.playerId !== playerId) return false;
     return (field === "bid" && game.phase === "bidding") || (field === "tricks" && game.phase === "tricks");
@@ -153,8 +156,14 @@ export function RoundEntry({ shareCode, role, game }: Props) {
                           </option>
                         ))}
                       </select>
+                    ) : value !== undefined ? (
+                      <span className="entry-value">{value}</span>
+                    ) : field === "tricks" && game.phase !== "tricks" ? (
+                      <span className="entry-value entry-locked" title="Erst nach der Ansagephase möglich">
+                        🔒
+                      </span>
                     ) : (
-                      <span className="entry-value">{value ?? "…"}</span>
+                      <span className="entry-value">…</span>
                     )}
                   </td>
                 );
