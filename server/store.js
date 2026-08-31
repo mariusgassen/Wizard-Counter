@@ -53,3 +53,15 @@ export function verifyAdmin(shareCode, secret) {
 export function gameExists(shareCode) {
   return !!selectStmt.get(shareCode);
 }
+
+const healthStmt = db.prepare("SELECT 1");
+
+/** Confirms the database connection is actually usable (for health checks). */
+export function isHealthy() {
+  try {
+    healthStmt.get();
+    return true;
+  } catch {
+    return false;
+  }
+}

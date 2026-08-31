@@ -5,10 +5,20 @@ services:
     environment:
       - PORT=3000
       - DATA_DIR=/app/data
+      # Coolify magic variable: set this to your domain in Coolify's
+      # environment variables tab (or leave empty for an auto-generated one).
+      # Coolify then wires up the reverse proxy + TLS for this port itself.
+      - SERVICE_FQDN_APP_3000
     volumes:
       - wizard_data:/app/data
     expose:
       - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   wizard_data:

@@ -64,15 +64,26 @@ Das Repository enthält ein `docker-compose.yml` + `Dockerfile` für Coolify.
 
 1. In Coolify eine neue **Application** vom Typ **Docker Compose** anlegen
    und dieses Repository verbinden (Compose-Datei: `docker-compose.yml`).
-2. Unter den Service-Einstellungen des `app`-Service eine **Domain**
-   setzen (z. B. `wizard.deine-domain.de`) — Coolify kümmert sich um
-   Reverse-Proxy und TLS-Zertifikat. Diese Basis-Domain wird automatisch für
-   alle Share-Links verwendet (die App baut sie clientseitig aus der
-   aktuellen URL).
+2. **Domain über Umgebungsvariable setzen:** `docker-compose.yml` enthält
+   bereits die Coolify-"Magic"-Variable `SERVICE_FQDN_APP_3000` für den
+   `app`-Service. Unter **Environment Variables** in Coolify siehst du diese
+   Variable und trägst dort direkt deine Domain ein (z. B.
+   `wizard.deine-domain.de`) — Coolify richtet Reverse-Proxy und
+   TLS-Zertifikat dafür automatisch ein. Lässt du das Feld leer, generiert
+   Coolify selbst eine erreichbare `*.sslip.io`-Domain. Diese Basis-Domain
+   wird automatisch für alle Share-Links verwendet (die App baut sie
+   clientseitig aus der aktuellen URL, kein weiterer Code nötig).
 3. Deploy auslösen.
+
+**Healthcheck:** Der Container prüft sich selbst über `GET /api/health`
+(via `HEALTHCHECK` im Dockerfile und zusätzlich im `docker-compose.yml`
+hinterlegt) — der Endpoint testet dabei auch, ob die SQLite-Datenbank
+erreichbar ist. Coolify nutzt das, um ein Deployment erst als "healthy" zu
+markieren, wenn der Server tatsächlich läuft, und um einen abgestürzten
+Container zu erkennen.
 
 **Persistenz:** Der Container schreibt seine SQLite-Datenbank nach
 `/app/data`. Das `docker-compose.yml` bindet dafür bereits ein benanntes
 Volume (`wizard_data`) ein, damit Spielstände ein Redeploy überleben.
 
-Keine externen Dienste oder zusätzlichen Umgebungsvariablen nötig.
+Keine externen Dienste nötig.

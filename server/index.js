@@ -47,6 +47,14 @@ const asyncRoute = (fn) => (req, res, next) => {
   }
 };
 
+app.get("/api/health", (req, res) => {
+  if (store.isHealthy()) {
+    res.json({ status: "ok" });
+  } else {
+    res.status(503).json({ status: "error" });
+  }
+});
+
 app.post(
   "/api/games",
   asyncRoute((req, res) => {
