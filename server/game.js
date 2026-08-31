@@ -112,8 +112,13 @@ export function setEntry(state, { playerId, field, value, roundIndex, isAdmin })
     if (field !== expectedField) {
       throw new HttpError(403, "Dieses Feld ist gerade nicht freigegeben.");
     }
-  } else if (targetRoundIndex === state.currentRoundIndex && field === "tricks" && state.phase !== "tricks") {
-    throw new HttpError(400, "Die Stiche können erst eingetragen werden, wenn die Ansagephase abgeschlossen ist.");
+  } else if (targetRoundIndex === state.currentRoundIndex) {
+    if (field === "tricks" && state.phase !== "tricks") {
+      throw new HttpError(400, "Die Stiche können erst eingetragen werden, wenn die Ansagephase abgeschlossen ist.");
+    }
+    if (field === "bid" && state.phase !== "bidding") {
+      throw new HttpError(400, "Die Ansage ist bereits abgeschlossen und kann nicht mehr geändert werden.");
+    }
   }
 
   if (targetRoundIndex < 0 || targetRoundIndex > state.currentRoundIndex) {
@@ -143,6 +148,13 @@ export function advancePhase(state) {
   if (state.status !== "playing") throw new HttpError(400, "Das Spiel läuft aktuell nicht.");
 
   if (state.phase === "bidding") {
+    const missing = state.players.filter((p) => state.currentEntries[p.id]?.bid === undefined);
+    if (missing.length > 0) {
+      throw new HttpError(
+        400,
+        `${missing.map((p) => p.name).join(", ")} ${missing.length === 1 ? "hat" : "haben"} noch keine Ansage gemacht.`,
+      );
+    }
     state.phase = "tricks";
     return state;
   }

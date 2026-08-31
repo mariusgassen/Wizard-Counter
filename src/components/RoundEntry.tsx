@@ -18,12 +18,12 @@ export function RoundEntry({ shareCode, role, game }: Props) {
   const dealer = game.players[dealerIndex(game.currentRoundIndex, game.players.length)];
 
   function canEdit(playerId: string, field: "bid" | "tricks") {
-    // Tricks can't be known before the round is actually played, so this column
-    // stays locked for everyone – including the admin – until the tricks phase.
-    if (field === "tricks" && game.phase !== "tricks") return false;
+    // Each field only exists during its own phase – the bid before the round is
+    // played, the tricks after – so it's locked outside that phase for everyone,
+    // admin included, once it has been decided.
+    if (field !== activeField) return false;
     if (role.kind === "admin") return true;
-    if (role.kind !== "player" || role.playerId !== playerId) return false;
-    return (field === "bid" && game.phase === "bidding") || (field === "tricks" && game.phase === "tricks");
+    return role.kind === "player" && role.playerId === playerId;
   }
 
   function valueOf(playerId: string, field: "bid" | "tricks") {
@@ -158,8 +158,15 @@ export function RoundEntry({ shareCode, role, game }: Props) {
                       </select>
                     ) : value !== undefined ? (
                       <span className="entry-value">{value}</span>
-                    ) : field === "tricks" && game.phase !== "tricks" ? (
-                      <span className="entry-value entry-locked" title="Erst nach der Ansagephase möglich">
+                    ) : field !== activeField ? (
+                      <span
+                        className="entry-value entry-locked"
+                        title={
+                          field === "tricks"
+                            ? "Erst nach der Ansagephase möglich"
+                            : "Ansagephase ist bereits abgeschlossen"
+                        }
+                      >
                         🔒
                       </span>
                     ) : (
@@ -182,7 +189,12 @@ export function RoundEntry({ shareCode, role, game }: Props) {
       {error && <p className="warning">{error}</p>}
 
       {isAdmin && (
-        <button type="button" className="primary" onClick={handleAdvance} disabled={busy}>
+        <button
+          type="button"
+          className="primary"
+          onClick={handleAdvance}
+          disabled={busy || (game.phase === "bidding" && missing.length > 0)}
+        >
           {game.phase === "bidding" ? "Stiche öffnen" : "Runde abschließen"}
         </button>
       )}
