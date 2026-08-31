@@ -1,21 +1,32 @@
 export interface Player {
   id: string;
   name: string;
+  claimed: boolean;
 }
 
 export interface RoundEntry {
-  bid: number;
-  tricks: number;
+  bid?: number;
+  tricks?: number;
 }
 
-/** One completed round: entries keyed by player id. */
-export type RoundResult = Record<string, RoundEntry>;
+/** One finalized round: entries keyed by player id. */
+export type RoundResult = Record<string, { bid: number; tricks: number }>;
+
+export type GameStatus = "setup" | "playing" | "finished";
+export type Phase = "bidding" | "tricks" | null;
 
 export interface GameState {
+  status: GameStatus;
   players: Player[];
+  totalRounds: number | null;
+  currentRoundIndex: number;
+  phase: Phase;
+  currentEntries: Record<string, RoundEntry>;
   rounds: RoundResult[];
-  /** Index of the round currently being entered (0-based). */
-  currentRound: number;
-  totalRounds: number;
-  startedAt: number;
+  createdAt: number;
 }
+
+export type Role =
+  | { kind: "admin"; adminSecret: string }
+  | { kind: "player"; playerId: string; playerToken: string }
+  | { kind: "spectator" };

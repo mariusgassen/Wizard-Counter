@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - DATA_DIR=/app/data
+    volumes:
+      - wizard_data:/app/data
+    expose:
+      - "3000"
+
+volumes:
+  wizard_data:
