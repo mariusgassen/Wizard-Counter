@@ -35,6 +35,19 @@ function CopyRow({ label, value }: { label: string; value: string }) {
 export function ShareBox({ shareCode, role }: Props) {
   const origin = window.location.origin;
   const shareLink = `${origin}/g/${shareCode}`;
+  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
+
+  async function share() {
+    try {
+      await navigator.share({
+        title: "Wizard-Zähler",
+        text: `Mach mit beim Wizard-Spiel! Code: ${shareCode}`,
+        url: shareLink,
+      });
+    } catch {
+      // user cancelled the share sheet or it failed silently — copy links remain as fallback
+    }
+  }
 
   return (
     <div className="share-box">
@@ -42,6 +55,11 @@ export function ShareBox({ shareCode, role }: Props) {
         Spiel-Code an die Mitspieler durchsagen oder den Link schicken. Jeder kann sich damit als einer
         der angelegten Spieler eintragen und seine eigenen Ansagen &amp; Stiche live eingeben.
       </p>
+      {canShare && (
+        <button type="button" className="primary share-button" onClick={share}>
+          Spiel-Link teilen
+        </button>
+      )}
       <CopyRow label="Spiel-Code" value={shareCode} />
       <CopyRow label="Spiel-Link" value={shareLink} />
       {role.kind === "admin" && (
