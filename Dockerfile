@@ -1,14 +1,17 @@
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build && npm prune --omit=dev
 
-FROM node:22-alpine AS runtime
+FROM node:24-alpine AS runtime
+RUN apk upgrade --no-cache \
+  && npm install -g npm@latest \
+  && npm cache clean --force
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
